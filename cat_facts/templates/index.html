@@ -1,0 +1,101 @@
+{% extends  "base.html" %}
+{% block title %}Home{% endblock title %}
+{% block head %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('a#submit').bind('click', function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/submit",
+                    data: { fact: $("#new-fact").val() }
+                }).done(function(msg) {
+                    var fact_display = $("#display > .cont");
+                    var hero_header = $(document.createElement('h1'));
+                    var hero_body = $(document.createElement('p'));
+
+                    hero_header.append("Cat Fact #" + msg.id);
+                    hero_body.append(msg.factoid);
+
+                    fact_display.empty(); 
+                    fact_display.append(hero_header);
+                    fact_display.append(hero_body);
+
+                    $("#addfact").modal('hide');
+                    $("#newfact").empty();
+                    console.log(msg);
+                });
+            });
+
+            $('a#next-button').bind('click', function() {
+                  $.ajax({
+                    type: "GET",
+                    url: "/getfact",
+                }).done(function(msg) {
+                    var fact_display = $('#display > .cont');
+                    var hero_header = $(document.createElement('h1'));
+                    var hero_body = $(document.createElement('p'));
+
+                    hero_header.append("Cat Fact #" + msg.id);
+                    hero_body.append(msg.factoid);
+
+                    fact_display.empty(); 
+                    fact_display.append(hero_header);
+                    fact_display.append(hero_body);
+
+                    $("#addfact").modal('hide');
+                    $("#newfact").empty();
+                    console.log(msg);
+                });
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="span4 offset4">
+            <div style="width:430px; margin-left: auto; margin-right: auto;">
+            <div class="page-header">
+                <h1>Cat Facts! 
+                    <small>For all your cat facts needs.</small>
+                </h1>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% if cat_fact is none %}
+        <div id="display" class="hero-unit" style="margin-left: auto; margin-right: auto; width: 70%">
+            <div class="cont">
+            <h1>Oh No!</h1>
+            <p>There appears to be a dearth of cat facts here. In order to fix this problem,
+               please add a cat fact by clicking on the button below. We greatly appreciate
+               your contribution to the dissemination of cat knowledge.</p>
+            </div>
+            <a class="btn btn-large btn-primary" data-toggle="modal" href="#addfact">Add Fact</a>
+        </div>
+        {% else %}
+        <div id="display" class="hero-unit" style="margin-left: auto; margin-right: auto; width: 70%">
+            <div class="cont">
+            <h1>Cat Fact #{{ cat_fact.id }}</h1>
+            <p>{{ cat_fact.factoid }}</p>
+            </div>
+            <a class="btn btn-large" href="#" id="next-button">Next Fact</a>
+            <a class="btn btn-large btn-primary" data-toggle="modal" href="#addfact">Add Fact</a>
+        {% endif %}
+        <div class="modal hide fade" id="addfact">
+            <div class="modal-header">
+                <button class="close" data-dismiss="modal">×</button>
+                <h3>New Fact!</h3>
+            </div>
+            <div class="modal-body">
+                <label>Please enter your cat fact below:</label>
+                <textarea id="new-fact" style="width: 95%; height: 200px; resize: none;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
+                <a href="#" id="submit" class="btn btn-primary">Submit</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
