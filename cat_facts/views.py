@@ -23,6 +23,9 @@ def get_fact():
 
 def get_cat_fact():
     num = app.config['CAT_FACTS']
-    fact_number = randint(1, num)
+    if(num > 0):
+        fact_number = randint(1, num)
+    else:
+        fact_number= num
     catfact = CatFact.query.filter(CatFact.id == fact_number).first()
     return catfact

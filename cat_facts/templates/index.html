@@ -44,7 +44,7 @@
                     fact_display.append(hero_body);
 
                     $("#addfact").modal('hide');
-                    $("#newfact").empty();
+                    $("#newfact").attr("value", "");
                     console.log(msg);
                 });
             });
@@ -53,13 +53,11 @@
 {% endblock %}
 {% block content %}
     <div class="row">
-        <div class="span4 offset4">
-            <div style="width:430px; margin-left: auto; margin-right: auto;">
-            <div class="page-header">
+        <div class="span8 offset2">
+            <div class="page-header" style="width:430px; margin-left: auto; margin-right: auto;">
                 <h1>Cat Facts! 
                     <small>For all your cat facts needs.</small>
                 </h1>
-            </div>
             </div>
         </div>
     </div>

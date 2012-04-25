@@ -1,1 +1,9 @@
 This is a project dedicated to providing you with on demand cat facts!
+
+Setup
+======
+Just run install.sh and you should be good to go.
+
+Running
+========
+Just type `pythong runserver.py`
