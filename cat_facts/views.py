@@ -15,6 +15,7 @@ def show_cat_facts():
 def submit_cat_fact():
     fact_text = request.form['fact']
     fact_text = sanitizeHtml(fact_text)
+    strip(fact_text)
     if fact_text != '':
         fact = CatFact(fact_text)
         db_session.add(fact)
