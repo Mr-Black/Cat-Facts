@@ -1,3 +1,6 @@
+import re
+from urlparse import urljoin
+from BeautifulSoup import BeautifulSoup, Comment
 from random import randint
 from flask import render_template, request, jsonify
 from cat_facts import app
@@ -10,11 +13,14 @@ def show_cat_facts():
 
 @app.route('/submit', methods=['POST'])
 def submit_cat_fact():
-    fact = CatFact(request.form['fact'])
-    db_session.add(fact)
-    db_session.commit()
-    app.config['CAT_FACTS'] += 1
-    return jsonify(fact.serialize())     
+    fact_text = request.form['fact']
+    fact_text = sanitizeHtml(fact_text)
+    if fact_text != '':
+        fact = CatFact(fact_text)
+        db_session.add(fact)
+        db_session.commit()
+        app.config['CAT_FACTS'] += 1
+        return jsonify(fact.serialize())     
 
 @app.route('/getfact', methods=['GET'])
 def get_fact():
@@ -29,3 +35,28 @@ def get_cat_fact():
         fact_number= num
     catfact = CatFact.query.filter(CatFact.id == fact_number).first()
     return catfact
+
+def sanitizeHtml(value, base_url=None):
+    rjs = r'[\s]*(&#x.{1,7})?'.join(list('javascript:'))
+    rvb = r'[\s]*(&#x.{1,7})?'.join(list('vbscript:'))
+    re_scripts = re.compile('(%s)|(%s)' % (rjs, rvb), re.IGNORECASE)
+    validTags = 'p i strong b u a h1 h2 h3 pre br img'.split()
+    validAttrs = 'href src width height'.split()
+    urlAttrs = 'href src'.split() # Attributes which should have a URL
+    soup = BeautifulSoup(value)
+    for comment in soup.findAll(text=lambda text: isinstance(text, Comment)):
+        # Get rid of comments
+        comment.extract()
+    for tag in soup.findAll(True):
+        if tag.name not in validTags:
+            tag.hidden = True
+        attrs = tag.attrs
+        tag.attrs = []
+        for attr, val in attrs:
+            if attr in validAttrs:
+                val = re_scripts.sub('', val) # Remove scripts (vbs & js)
+                if attr in urlAttrs:
+                    val = urljoin(base_url, val) # Calculate the absolute url
+                tag.attrs.append((attr, val))
+
+    return soup.renderContents().decode('utf8')
