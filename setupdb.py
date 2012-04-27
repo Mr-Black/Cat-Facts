@@ -1,2 +1,2 @@
-from cat_facts import database
-database.db_init()
+from cat_facts.database import init_db
+init_db()
