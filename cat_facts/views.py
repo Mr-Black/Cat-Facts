@@ -15,8 +15,8 @@ def show_cat_facts():
 def submit_cat_fact():
     fact_text = request.form['fact']
     fact_text = sanitizeHtml(fact_text)
-    strip(fact_text)
-    if fact_text != '':
+    fact_text = fact_text.strip()
+    if len(fact_text) > 0:
         fact = CatFact(fact_text)
         db_session.add(fact)
         db_session.commit()
@@ -41,8 +41,8 @@ def sanitizeHtml(value, base_url=None):
     rjs = r'[\s]*(&#x.{1,7})?'.join(list('javascript:'))
     rvb = r'[\s]*(&#x.{1,7})?'.join(list('vbscript:'))
     re_scripts = re.compile('(%s)|(%s)' % (rjs, rvb), re.IGNORECASE)
-    validTags = 'p i strong b u a h1 h2 h3 pre br img'.split()
-    validAttrs = 'href src width height'.split()
+    validTags = ''.split()
+    validAttrs = ''.split()
     urlAttrs = 'href src'.split() # Attributes which should have a URL
     soup = BeautifulSoup(value)
     for comment in soup.findAll(text=lambda text: isinstance(text, Comment)):
