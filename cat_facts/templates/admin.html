@@ -1,0 +1,49 @@
+{% extends  "base.html" %}
+{% block title %}Admin{% endblock title %}
+{% block head %}
+    {{ super() }}
+    <script type="text/javascript">
+        csrf_token = "{{ csrf_token() }}"
+
+        $(document).ready(function() {
+            $('button.delete-fact').bind('click', function(ev) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/fact/" + $(this).closest("tr").attr('id').
+                        replace("fact-", '') + "?_csrf_token=" + csrf_token,
+                }).done(function(msg) {
+                    csrf_token = msg['_csrf_token'];
+                    $(ev.currentTarget).closest("tr").
+                        fadeTo("fast", 0, function() { $(this).remove() });
+                    console.log(msg);
+                });
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="span8 offset2">
+            <div class="page-header" style="width:430px; margin-left: auto; margin-right: auto;">
+                <h1>Cat Facts! 
+                    <small>For all your cat facts needs.</small>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <table class="table table-striped">
+        {% for cat_fact in cat_facts %}
+        <tr class="hero-unit" id="fact-{{ cat_fact.id }}">
+            <td width='1%'>
+                #{{ cat_fact.id }}
+            </td>
+            <td>
+                {{ cat_fact.factoid }}
+            </td>
+            <td width='1%'>
+                <button class="btn btn-danger delete-fact">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock content %}
