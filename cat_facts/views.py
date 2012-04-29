@@ -1,11 +1,16 @@
 import re
+import auth
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup, Comment
 from random import randint
-from flask import render_template, request, jsonify
+from flask import abort, render_template, request, session, jsonify
 from cat_facts import app
 from cat_facts.database import db_session
 from cat_facts.models import CatFact
+import csrf_protect
+
+authDB = auth.FlaskRealmDigestDB('Cat Facts')
+authDB.add_user('admin', app.config['ADMIN_PASSWORD'])
 
 @app.route('/')
 def show_cat_facts():
@@ -21,7 +26,9 @@ def submit_cat_fact():
         db_session.add(fact)
         db_session.commit()
         app.config['CAT_FACTS'] += 1
-        return jsonify(fact.serialize())     
+        result = fact.serialize()
+        result['_csrf_token'] = csrf_protect.generate_csrf_token()
+        return jsonify(result)
 
 @app.route('/getfact', methods=['GET'])
 def get_fact():
@@ -36,6 +43,28 @@ def get_cat_fact():
         fact_number= num
     catfact = CatFact.query.filter(CatFact.id == fact_number).first()
     return catfact
+
+@app.route('/admin', methods=['GET'])
+@authDB.requires_auth
+def admin():
+    session['user'] = request.authorization.username
+    return render_template('admin.html', cat_facts=CatFact.query.all())
+
+@app.route('/fact/<int:fact_id>', methods=['DELETE'])
+def delete(fact_id):
+    if 'user' not in session:
+        abort(403)
+
+    catfact = CatFact.query.filter(CatFact.id == fact_id).first()
+    if not catfact:
+        abort(404)
+
+    db_session.delete(catfact)
+    db_session.commit()
+
+    app.logger.info('User {1} deleted cat fact #{0:d}'.format(fact_id,
+        session['user']))
+    return jsonify({'_csrf_token': csrf_protect.generate_csrf_token()})
 
 def sanitizeHtml(value, base_url=None):
     rjs = r'[\s]*(&#x.{1,7})?'.join(list('javascript:'))

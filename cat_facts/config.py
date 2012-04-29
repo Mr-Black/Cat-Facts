@@ -5,3 +5,5 @@ BASE = declarative_base()
 DEBUG = True
 SECRET_KEY = 'development key'
 CAT_FACTS = 0
+
+ADMIN_PASSWORD = 'password'
