@@ -3,18 +3,13 @@
 {% block head %}
     {{ super() }}
     <script type="text/javascript">
-        csrf_token = "{{ csrf_token() }}"
-
         $(document).ready(function() {
             $('a#submit').bind('click', function() {
                 $.ajax({
                     type: "POST",
                     url: "/submit",
-                    data: { fact: $("#new-fact").val(),
-                            _csrf_token: csrf_token }
+                    data: { fact: $("#new-fact").val() }
                 }).done(function(msg) {
-                    csrf_token = msg['_csrf_token'];
-
                     var fact_display = $("#display > .cont");
                     var hero_header = $(document.createElement('h1'));
                     var hero_body = $(document.createElement('p'));

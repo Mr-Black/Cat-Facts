@@ -7,7 +7,7 @@ from flask import abort, render_template, request, session, jsonify
 from cat_facts import app
 from cat_facts.database import db_session
 from cat_facts.models import CatFact
-import csrf_protect
+import csrf
 
 authDB = auth.FlaskRealmDigestDB('Cat Facts')
 authDB.add_user('admin', app.config['ADMIN_PASSWORD'])
@@ -17,6 +17,7 @@ def show_cat_facts():
     return render_template('index.html', cat_fact=get_cat_fact())
 
 @app.route('/submit', methods=['POST'])
+@csrf.csrf_exempt
 def submit_cat_fact():
     fact_text = request.form['fact']
     fact_text = sanitizeHtml(fact_text)
@@ -26,9 +27,7 @@ def submit_cat_fact():
         db_session.add(fact)
         db_session.commit()
         app.config['CAT_FACTS'] += 1
-        result = fact.serialize()
-        result['_csrf_token'] = csrf_protect.generate_csrf_token()
-        return jsonify(result)
+        return jsonify(fact.serialize())
 
 @app.route('/getfact', methods=['GET'])
 def get_fact():
@@ -64,7 +63,7 @@ def delete(fact_id):
 
     app.logger.info('User {1} deleted cat fact #{0:d}'.format(fact_id,
         session['user']))
-    return jsonify({'_csrf_token': csrf_protect.generate_csrf_token()})
+    return jsonify({'_csrf_token': csrf.generate_csrf_token()})
 
 def sanitizeHtml(value, base_url=None):
     rjs = r'[\s]*(&#x.{1,7})?'.join(list('javascript:'))

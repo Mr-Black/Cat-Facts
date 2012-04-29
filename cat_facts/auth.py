@@ -4,6 +4,7 @@ from functools import wraps
 import authdigest
 import flask
 
+
 class FlaskRealmDigestDB(authdigest.RealmDigestDB):
     def requires_auth(self, f):
         @wraps(f)
