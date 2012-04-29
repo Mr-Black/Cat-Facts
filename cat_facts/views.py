@@ -2,7 +2,6 @@ import re
 import auth
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup, Comment
-from random import randint
 from flask import abort, render_template, request, session, jsonify
 from cat_facts import app
 from cat_facts.database import db_session
@@ -26,7 +25,6 @@ def submit_cat_fact():
         fact = CatFact(fact_text)
         db_session.add(fact)
         db_session.commit()
-        app.config['CAT_FACTS'] += 1
         return jsonify(fact.serialize())
 
 @app.route('/getfact', methods=['GET'])
@@ -35,12 +33,7 @@ def get_fact():
     return jsonify(fact.serialize())
 
 def get_cat_fact():
-    num = app.config['CAT_FACTS']
-    if(num > 0):
-        fact_number = randint(1, num)
-    else:
-        fact_number= num
-    catfact = CatFact.query.filter(CatFact.id == fact_number).first()
+    catfact = CatFact.random()
     return catfact
 
 @app.route('/admin', methods=['GET'])
