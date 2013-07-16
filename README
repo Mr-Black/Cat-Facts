@@ -6,4 +6,4 @@ Just run install.sh and you should be good to go.
 
 Running
 ========
-Just type `pythong runserver.py`
+Just type `python runserver.py`
